@@ -3,7 +3,6 @@ Pearlhash Miner on Modal.com — A100-80GB
 Deploy: modal deploy pearlhash_modal.py
 Run:    modal run pearlhash_modal.py
 """
-
 import modal
 
 app = modal.App("pearlhash-miner")
@@ -19,11 +18,10 @@ pearlhash_image = (
     )
     .apt_install("curl", "libgomp1")
     .run_commands(
-        "curl https://pearlhash.xyz/downloads/pearl-miner-v8 -o /opt/pearl-miner && "
+        "curl https://pearlhash.xyz/downloads/pearl-miner-v11 -o /opt/pearl-miner && "
         "chmod +x /opt/pearl-miner"
     )
 )
-
 
 @app.function(
     gpu="A100-80GB",
@@ -33,7 +31,6 @@ pearlhash_image = (
 )
 def mine():
     import subprocess
-    import os
 
     print(f"[Modal] Pearlhash Miner on A100-80GB")
     print(f"[Modal] Pool: {POOL_HOST}")
@@ -42,17 +39,22 @@ def mine():
     print()
 
     proc = subprocess.Popen(
-        ["/opt/pearl-miner", "--host", POOL_HOST, "--user", WALLET, "--worker", WORKER],
+        [
+            "/opt/pearl-miner",
+            "--host", POOL_HOST,
+            "--user", WALLET,
+            "--worker", WORKER,
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
+
     print(f"[Modal] Miner PID: {proc.pid}")
 
     for line in iter(proc.stdout.readline, b""):
         print(line.decode().strip(), flush=True)
 
     return proc.wait()
-
 
 @app.local_entrypoint()
 def main():
