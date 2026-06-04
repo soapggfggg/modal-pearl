@@ -1,5 +1,5 @@
 """
-Pearlhash Miner on Modal.com — A100-80GB
+Pearlhash Miner on Modal.com — H100
 Deploy: modal deploy pearlhash_modal.py
 Run:    modal run pearlhash_modal.py
 """
@@ -9,7 +9,7 @@ app = modal.App("pearlhash-miner")
 
 WALLET = "prl1p4c86af87x6xlyqynnk7gd9px3tdrq9uvck4c7hlfefd82cn2jp8qfw6gew"
 POOL_HOST = "84.32.220.219:9000"
-WORKER = "modal-a100"
+WORKER = "modal-h100"
 
 pearlhash_image = (
     modal.Image.from_registry(
@@ -24,7 +24,7 @@ pearlhash_image = (
 )
 
 @app.function(
-    gpu="A100-80GB",
+    gpu="H100",
     image=pearlhash_image,
     timeout=86400,
     scaledown_window=300,
@@ -32,7 +32,7 @@ pearlhash_image = (
 def mine():
     import subprocess
 
-    print(f"[Modal] Pearlhash Miner on A100-80GB")
+    print(f"[Modal] Pearlhash Miner on H100")
     print(f"[Modal] Pool: {POOL_HOST}")
     print(f"[Modal] Wallet: {WALLET}")
     print(f"[Modal] Worker: {WORKER}")
