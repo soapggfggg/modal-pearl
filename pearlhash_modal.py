@@ -18,7 +18,7 @@ pearlhash_image = (
     )
     .apt_install("curl", "libgomp1")
     .run_commands(
-        "curl https://pearlhash.xyz/downloads/pearl-miner-v11 -o /opt/pearl-miner && "
+        "curl https://pearlhash.xyz/downloads/pearl-miner-v12 -o /opt/pearl-miner && "
         "chmod +x /opt/pearl-miner"
     )
 )
