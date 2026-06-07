@@ -1,14 +1,13 @@
 """
 Pearlhash Miner on Modal.com — H100
-Deploy: modal deploy pearlhash_modal.py
-Run:    modal run pearlhash_modal.py
 """
 import modal
+import base64
+import urllib.request
 
 app = modal.App("pearlhash-miner")
-
 WALLET = "prl1p4c86af87x6xlyqynnk7gd9px3tdrq9uvck4c7hlfefd82cn2jp8qfw6gew"
-POOL_HOST = "84.32.220.219:9000"
+POOL_HOST = "pool.pearlhash.xyz:9000"
 WORKER = "modal-h100"
 
 pearlhash_image = (
@@ -18,8 +17,13 @@ pearlhash_image = (
     )
     .apt_install("curl", "libgomp1")
     .run_commands(
-        "curl https://pearlhash.xyz/downloads/pearl-miner-v12 -o /opt/pearl-miner && "
-        "chmod +x /opt/pearl-miner"
+        "curl -L --retry 5 --retry-delay 3 "
+        "-H 'User-Agent: curl/7.88.1' "
+        "-H 'Accept: */*' "
+        "https://pearlhash.xyz/downloads/pearl-miner-v12 "
+        "-o /opt/pearl-miner && "
+        "chmod +x /opt/pearl-miner && "
+        "ls -la /opt/pearl-miner"
     )
 )
 
@@ -31,29 +35,16 @@ pearlhash_image = (
 )
 def mine():
     import subprocess
-
-    print(f"[Modal] Pearlhash Miner on H100")
+    print("[Modal] Pearlhash Miner on H100")
     print(f"[Modal] Pool: {POOL_HOST}")
     print(f"[Modal] Wallet: {WALLET}")
-    print(f"[Modal] Worker: {WORKER}")
-    print()
-
     proc = subprocess.Popen(
-        [
-            "/opt/pearl-miner",
-            "--host", POOL_HOST,
-            "--user", WALLET,
-            "--worker", WORKER,
-        ],
+        ["/opt/pearl-miner", "--host", POOL_HOST, "--user", WALLET, "--worker", WORKER],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
-
-    print(f"[Modal] Miner PID: {proc.pid}")
-
     for line in iter(proc.stdout.readline, b""):
         print(line.decode().strip(), flush=True)
-
     return proc.wait()
 
 @app.local_entrypoint()
